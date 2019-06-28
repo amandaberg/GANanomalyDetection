@@ -26,7 +26,7 @@ desc += '-mnist_2_0.0';               dataset = EasyDict(tfrecord_dir='mnist_2_0
 ```
 
 ### Anomaly detection
-Uncomment the anomaly detection example in config.py and edit run_id (the id of the folder where the results are saved) and the test_data_folder. The test_data_folder should contain .png files of the same dimensions as the images used for training.
+Uncomment the anomaly detection example in config.py (row 153) and edit run_id (the id of the folder where the results are saved) and test_data_folder. The test_data_folder should contain .png files of the same dimensions as the images used for training.
 
 ## MNIST example dataset
 I have included an example dataset. Unpack the dataset.zip folder in order to use it. In this dataset, MNIST number 2 is considered to be normal samples and all other numbers anomalies. There are no anomalies in the training data.
