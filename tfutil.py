@@ -831,7 +831,8 @@ class AnomalyDetectorEncoder(object):
 		dis_f_input = self.Da_test.get_output_for(test_data_tensor, is_training=False)
 
 		dis_loss = tf.reduce_sum(tf.reduce_sum(tf.reduce_sum(tf.abs(tf.subtract(dis_f_z, dis_f_input)),1),1),1)
-		ano_score = (1. - self.ano_para)* res_loss + self.ano_para* dis_loss
+		#ano_score = (1. - self.ano_para)* res_loss + self.ano_para* dis_loss
+		ano_score = (1. - self.ano_para)* dis_loss + self.ano_para* res_loss
 		
 		sess = tf.get_default_session() 
 		samples = sess.run(closest_matches)
