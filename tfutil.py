@@ -813,8 +813,8 @@ class AnomalyDetectorEncoder(object):
 		
 		self.test_result_dir = "test_result"
 		
-		image_dims = [Ga.output_shapes[0][1], Ga.output_shapes[0][2], Ga.output_shapes[0][3]]
-
+		self.image_dims = [Ga.output_shapes[0][1], Ga.output_shapes[0][2], Ga.output_shapes[0][3]]
+		self.z_dims = [Ga.input_shapes[0][2],Ga.input_shapes[0][3]]
 
 	def find_closest_match(self, test_data, test_data_name, test_batch_size=8):
 		print ("Filename: ", test_data_name, "Detecting anomalies")
@@ -826,12 +826,13 @@ class AnomalyDetectorEncoder(object):
 		latents = self.Ea.get_output_for(test_data_tensor, is_training=False)#TODO FIXA SNYGGARE!!!!
 		closest_matches = self.Ga.get_output_for(latents, is_training=False)
 
-		res_loss = tf.reduce_sum(tf.reduce_sum(tf.reduce_sum(tf.abs(tf.subtract(test_data_tensor, closest_matches)),1),1),1)
+		res_loss = 1/(self.image_dims[0]*self.image_dims[1]*self.image_dims[2])*
+			tf.reduce_sum(tf.reduce_sum(tf.reduce_sum(tf.abs(tf.subtract(test_data_tensor, closest_matches)),1),1),1)
 		dis_f_z = self.Da_Gout.get_output_for(closest_matches, is_training=False)
 		dis_f_input = self.Da_test.get_output_for(test_data_tensor, is_training=False)
-
-		dis_loss = tf.reduce_sum(tf.reduce_sum(tf.reduce_sum(tf.abs(tf.subtract(dis_f_z, dis_f_input)),1),1),1)
-		ano_score = (1. - self.ano_para)* res_loss + self.ano_para* dis_loss
+		
+		dis_loss = -1/(tf.math.sqrt(self.z_dims[0]*self.z_dims[1]))*
+			tf.reduce_sum(tf.reduce_sum(tf.reduce_sum(tf.abs(tf.subtract(dis_f_z, dis_f_input)),1),1),1)
 		
 		sess = tf.get_default_session() 
 		samples = sess.run(closest_matches)
@@ -861,7 +862,7 @@ class AnomalyDetectorEncoder(object):
 			if not os.path.isdir(path):
 			  os.mkdir(path)
 			filename = ['AD_'+test_data_name[i].split("\\")[-1], 
-						'AD_error_'+str(sess.run(ano_score)[i])+'_'+str(sess.run(res_loss)[i])+'_'+test_data_name[i].split("\\")[-1],
+						'AD_error_'+str(sess.run(res_loss)[i])+'_'+test_data_name[i].split("\\")[-1],
 						'AD_anomaly_'+test_data_name[i].split("\\")[-1],
 						'AD_detections_'+test_data_name[i].split("\\")[-1],
 						'AD_z_'+test_data_name[i].split("\\")[-1]]
